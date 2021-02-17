@@ -1,15 +1,9 @@
 name: Deploy Docker container to Artifactory
 
 on:
-  push:
-    branches:
-      - main
-      - master
-      - dev
   pull_request:
     branches:
       - main
-      - master
 
 jobs:
   build:
@@ -28,5 +22,5 @@ jobs:
         uses: github/super-linter@v3
         env:
           VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
+          DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
