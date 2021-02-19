@@ -13,6 +13,7 @@ jobs:
       REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
       APP_NAME: app
       VERSION: latest
+      IMAGE: emiiia/node-web-app
 
     steps:
       ##########################
@@ -38,7 +39,7 @@ jobs:
       # Docker build #
       ################
       - name: Build a Docker image
-        run: docker build -t emiiia/node-web-app .
+        run: docker build -t env.IMAGE .
 
       ################################
       #  Check for Vulnerabilities   #
@@ -54,10 +55,4 @@ jobs:
           # or you can signup for free at https://snyk.io/login
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: emiiia/node-web-app
           args: --file=Dockerfile
-
-      - name: Run Snyk to check Docker image for vulnerabilities
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
