@@ -37,10 +37,12 @@ jobs:
       ################################
       #  Check for Vulnerabilities   #
       ################################
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
+      - name: Run Snyk to check Docker image for vulnerabilities
+        uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: env.REPO_NAME/env.APP_NAME
 
       ################
       # Docker build #
