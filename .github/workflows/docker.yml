@@ -39,7 +39,7 @@ jobs:
       # Docker build #
       ################
       - name: Build a Docker image
-        run: docker build -t env.IMAGE .
+        run: docker build -t $IMAGE .
 
       ################################
       #  Check for Vulnerabilities   #
