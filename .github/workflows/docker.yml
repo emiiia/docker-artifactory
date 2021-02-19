@@ -55,5 +55,5 @@ jobs:
           # or you can signup for free at https://snyk.io/login
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: $IMAGE
+          image: emiiia/node-web-app
           args: --file=Dockerfile
