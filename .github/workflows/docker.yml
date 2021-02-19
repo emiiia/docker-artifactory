@@ -7,8 +7,12 @@ on:
 
 jobs:
   build:
-    name: Lint Code Base
+    name: Lint, Synk, build
     runs-on: ubuntu-latest
+    env:
+      REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
+      APP_NAME: app
+      VERSION: latest
 
     steps:
       ##########################
@@ -20,7 +24,6 @@ jobs:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
-
       ################################
       # Run Linter against code base #
       ################################
@@ -30,6 +33,14 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      ################################
+      #  Check for Vulnerabilities   #
+      ################################
+      - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       ################
       # Docker build #
@@ -43,16 +54,15 @@ jobs:
       - name: Login to Artifactory Registry
         uses: docker/login-action@v1
         with:
-          registry: elilillyco-github-actions-docker-lc.jfrog.io
+          registry: env.REPO_NAME
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: .
           push: true
-          tags: elilillyco-github-actions-docker-lc.jfrog.io/app:latest
+          tags: env.REPO_NAME/env.APP_NAME:env.VERSION
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
