@@ -40,9 +40,10 @@ jobs:
       # Docker build #
       ################
       - name: Build a Docker image
-        run: docker build -t $IMAGE .
-             docker tag $IMAGE $IMAGE:$VERSION
-
+        run: |
+          docker build -t $IMAGE .
+          docker tag $IMAGE $IMAGE:$VERSION
+          
 
       - name: Logging Images
         run: docker images
