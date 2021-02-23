@@ -10,8 +10,6 @@ jobs:
     name: Lint, Synk, build
     runs-on: ubuntu-latest
     env:
-      REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-      APP_NAME: app
       VERSION: latest
       IMAGE: emiiia/node-web-app
 
