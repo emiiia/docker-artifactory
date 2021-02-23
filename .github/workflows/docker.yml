@@ -55,8 +55,7 @@ jobs:
       # Docker build #
       ################
       - name: Build and tag the Docker image
-        run: |
-          docker build -t ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+        run: docker build -t ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}} .
 
       ################
       # Docker push  #
