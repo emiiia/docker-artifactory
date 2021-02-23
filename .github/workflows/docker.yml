@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-      APP_NAME: pushTest
+      APP_NAME: pushtest
       VERSION: latest
 
     steps:
