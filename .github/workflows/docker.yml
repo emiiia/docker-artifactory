@@ -56,11 +56,11 @@ jobs:
         with:
           context: .
           push: true
-          tags: $REPO_NAME/$APP_NAME:$VERSION
+          tags: ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Pull image 
         run: |
-          docker pull $REPO_NAME/$APP_NAME:$VERSION
+          docker pull ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
