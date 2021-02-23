@@ -35,9 +35,9 @@ jobs:
       #     DEFAULT_BRANCH: main
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      ################
-      # Docker build #
-      ################
+      #####################
+      # Artifactory login #
+      #####################
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -47,19 +47,27 @@ jobs:
       - name: Login to Artifactory Registry
         uses: docker/login-action@v1
         with:
-          registry: ${{env.REPO_NAME}}
+          registry: ${{ env.REPO_NAME }}
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+      ################
+      # Docker build #
+      ################
+      - name: Build and tag the Docker image
+        run: |
+          docker build -t ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+
+      ################
+      # Docker push  #
+      ################
+      - name: Push to artifactory
+        run: docker push ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
 
       - name: Pull image 
         run: |
