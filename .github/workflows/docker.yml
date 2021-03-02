@@ -10,13 +10,24 @@ jobs:
     name: Lint Code Base
     strategy:
       matrix:
-        app_name:
-          - 'apptestone'
-          - 'apptesttwo'
+        directory:
+          - './folder1'
+          - './folder2'
+        include:
+        - directory: './folder1'
+          APP_NAME: 'apptestone'
+          VERSION: latest
+          
+        - directory: './folder2'
+          APP_NAME: 'apptesttwo'
+          VERSION: version1.0
+
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
     env:
       REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-      VERSION: latest
 
     steps:
       ##########################
@@ -48,13 +59,13 @@ jobs:
       # Docker build #
       ################
       - name: Build and tag the Docker image
-        run: docker build -t ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}} .
+        run: docker build -t ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}} .
 
       ################
       # Docker push  #
       ################
       - name: Push to artifactory
-        run: docker push ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}}
+        run: docker push ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
 
 
       - name: Image digest
@@ -63,4 +74,4 @@ jobs:
 
       - name: Pull image 
         run: |
-          docker pull ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}}
+          docker pull ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
