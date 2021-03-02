@@ -63,4 +63,4 @@ jobs:
 
       - name: Pull image 
         run: |
-          docker pull ${{env.REPO_NAME}}/${{env.directory}}:${{env.VERSION}}
+          docker pull ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}}
