@@ -8,10 +8,14 @@ on:
 jobs:
   build:
     name: Lint Code Base
+    strategy:
+      matrix:
+        directory:
+          - 'apptestone'
+          - 'apptesttwo'
     runs-on: ubuntu-latest
     env:
       REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-      APP_NAME: pushtest
       VERSION: latest
 
     steps:
@@ -23,17 +27,6 @@ jobs:
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
-
-
-      # ################################
-      # # Run Linter against code base #
-      # ################################
-      # - name: Lint Code Base
-      #   uses: github/super-linter@v3
-      #   env:
-      #     VALIDATE_ALL_CODEBASE: false
-      #     DEFAULT_BRANCH: main
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       #####################
       # Artifactory login #
@@ -55,13 +48,13 @@ jobs:
       # Docker build #
       ################
       - name: Build and tag the Docker image
-        run: docker build -t ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}} .
+        run: docker build -t ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}} .
 
       ################
       # Docker push  #
       ################
       - name: Push to artifactory
-        run: docker push ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+        run: docker push ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}}
 
 
       - name: Image digest
@@ -70,4 +63,4 @@ jobs:
 
       - name: Pull image 
         run: |
-          docker pull ${{env.REPO_NAME}}/${{env.APP_NAME}}:${{env.VERSION}}
+          docker pull ${{env.REPO_NAME}}/${{env.directory}}:${{env.VERSION}}
