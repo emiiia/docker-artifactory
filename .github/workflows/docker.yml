@@ -10,7 +10,7 @@ jobs:
     name: Lint Code Base
     strategy:
       matrix:
-        directory:
+        app_name:
           - 'apptestone'
           - 'apptesttwo'
     runs-on: ubuntu-latest
@@ -48,13 +48,13 @@ jobs:
       # Docker build #
       ################
       - name: Build and tag the Docker image
-        run: docker build -t ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}} .
+        run: docker build -t ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}} .
 
       ################
       # Docker push  #
       ################
       - name: Push to artifactory
-        run: docker push ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}}
+        run: docker push ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}}
 
 
       - name: Image digest
@@ -63,4 +63,4 @@ jobs:
 
       - name: Pull image 
         run: |
-          docker pull ${{env.REPO_NAME}}/${{matrix.directory}}:${{env.VERSION}}
+          docker pull ${{env.REPO_NAME}}/${{matrix.app_name}}:${{env.VERSION}}
