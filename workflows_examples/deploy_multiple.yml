@@ -1,0 +1,77 @@
+name: Deploy Docker container to Artifactory
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Lint Code Base
+    strategy:
+      matrix:
+        directory:
+          - './folder1'
+          - './folder2'
+        include:
+        - directory: './folder1'
+          APP_NAME: 'apptestone'
+          VERSION: latest
+          
+        - directory: './folder2'
+          APP_NAME: 'apptesttwo'
+          VERSION: version1.0
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    env:
+      REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
+
+    steps:
+      ##########################
+      # Checkout the code base #
+      ##########################
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      #####################
+      # Artifactory login #
+      #####################
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Artifactory Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REPO_NAME }}
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_TOKEN }}
+
+      ################
+      # Docker build #
+      ################
+      - name: Build and tag the Docker image
+        run: docker build -t ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}} .
+
+      ################
+      # Docker push  #
+      ################
+      - name: Push to artifactory
+        run: docker push ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
+
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+
+      - name: Pull image 
+        run: |
+          docker pull ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
