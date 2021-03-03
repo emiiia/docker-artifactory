@@ -1,13 +1,44 @@
 name: Deploy Docker container to Artifactory
 
+env:
+  REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
+
 on:
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
-    name: Lint Code Base
+  # setup:
+  #   name: Setup
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v2
+
+  #     - name: Get Event Data
+  #       run: |
+  #         echo "Event type: ${{ github.event_name }}"
+  #         if [[ ${{ github.event_name }} == "pull_request" ]] 
+  #         then
+  #           echo "Source Branch: ${{ github.head_ref }}"
+  #           echo "Target Branch: ${{ github.base_ref }}"
+  #         else
+  #           echo "Triggered by branch/tag: ${{ github.ref }}"
+  #         fi
+  #         echo "Commit Sha: ${{ github.sha }}"
+  #         echo "Event Actor: ${{ github.actor }}"
+
+  #     - name: Abort Previous Builds
+  #       uses: potiuk/cancel-workflow-runs@v4_8
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         cancelMode: duplicates
+
+
+  build_and_test:
+    name: Build, Lint and Test
     strategy:
       matrix:
         directory:
@@ -26,9 +57,6 @@ jobs:
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
-    env:
-      REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-
     steps:
       ##########################
       # Checkout the code base #
