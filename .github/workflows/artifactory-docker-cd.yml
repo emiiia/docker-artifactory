@@ -1,44 +1,44 @@
-name: Deploy Docker container to Artifactory
+name: Artifactory Docker CD
 
 env:
   REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
 
 on:
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [created, prereleased]
+  push:
+    tags:
+      - '*-alpha*'
+      - '*-beta*'
+      - 'rc*'
+      - 'v*'
 
 jobs:
-  # setup:
-  #   name: Setup
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 5
-  #   steps:
-  #     - name: Checkout Repo
-  #       uses: actions/checkout@v2
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
 
-  #     - name: Get Event Data
-  #       run: |
-  #         echo "Event type: ${{ github.event_name }}"
-  #         if [[ ${{ github.event_name }} == "pull_request" ]] 
-  #         then
-  #           echo "Source Branch: ${{ github.head_ref }}"
-  #           echo "Target Branch: ${{ github.base_ref }}"
-  #         else
-  #           echo "Triggered by branch/tag: ${{ github.ref }}"
-  #         fi
-  #         echo "Commit Sha: ${{ github.sha }}"
-  #         echo "Event Actor: ${{ github.actor }}"
+      - name: Get Event Data
+        run: |
+          echo "Event type: ${{ github.event_name }}"
+          echo "Triggered by branch/tag: ${{ github.ref }}"
+          echo "Commit Sha: ${{ github.sha }}"
+          echo "Event Actor: ${{ github.actor }}"
+      - name: Abort Previous Builds
+        uses: potiuk/cancel-workflow-runs@v4_8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cancelMode: duplicates
 
-  #     - name: Abort Previous Builds
-  #       uses: potiuk/cancel-workflow-runs@v4_8
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         cancelMode: duplicates
-
-
-  build_and_test:
-    name: Build, Lint and Test
+  deployToArtifactory:
+    name: Deploy to Artifactory
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 15
     strategy:
       matrix:
         directory:
@@ -52,24 +52,16 @@ jobs:
         - directory: './folder2'
           APP_NAME: 'apptesttwo'
           VERSION: version1.0
-
-    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ matrix.directory }}
     steps:
-      ##########################
-      # Checkout the code base #
-      ##########################
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
-      #####################
-      # Artifactory login #
-      #####################
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -83,22 +75,14 @@ jobs:
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_TOKEN }}
 
-      ################
-      # Docker build #
-      ################
       - name: Build and tag the Docker image
         run: docker build -t ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}} .
 
-      ################
-      # Docker push  #
-      ################
       - name: Push to artifactory
         run: docker push ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
 
-
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
 
       - name: Pull image 
         run: |
