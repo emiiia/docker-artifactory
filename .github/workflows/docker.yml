@@ -2,9 +2,6 @@ name: Deploy Docker container to Artifactory
 
 env:
   REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-  DIRECTORIES:
-    - './folder1'
-    - './folder2'
 
 on:
   pull_request:
@@ -44,7 +41,9 @@ jobs:
     name: Build, Lint and Test
     strategy:
       matrix:
-        directory: ${{ env.DIRECTORIES }}
+        directory:
+          - './folder1'
+          - './folder2'
         include:
         - directory: './folder1'
           APP_NAME: 'apptestone'
