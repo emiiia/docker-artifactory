@@ -2,7 +2,9 @@ name: Deploy Docker container to Artifactory
 
 env:
   REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
-  DIRECTORIES: ['./folder1', './folder2']
+  DIRECTORIES:
+    - './folder1'
+    - './folder2'
 
 on:
   pull_request:
