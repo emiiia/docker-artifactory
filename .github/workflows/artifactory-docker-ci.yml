@@ -37,19 +37,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           cancelMode: duplicates
 
-  build_and_test:
-    name: Build, Lint and Test
+  lint:
+    name: Lint Dockerfile
     runs-on: ubuntu-latest
     needs: [setup]
     timeout-minutes: 15
-    strategy:
-      matrix:
-        directory:
-          - './folder1'
-          - './folder2'
-    defaults:
-      run:
-        working-directory: ${{ matrix.directory }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
