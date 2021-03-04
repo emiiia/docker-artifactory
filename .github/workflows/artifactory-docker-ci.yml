@@ -86,9 +86,6 @@ jobs:
       - name: Build and tag the Docker image
         run: docker build -t ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}} .
 
-      - name: test
-        run: docker images
-
       - name: Check Open Source Dependency Security
         # Snyk can be used to break the build when it detects vulnerabilities.
         continue-on-error: true
@@ -97,7 +94,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
             image: ${{env.REPO_NAME}}/${{matrix.APP_NAME}}
-            args: --file=Dockerfile
+            args: --file=${{ matrix.directory }}/Dockerfile
             # To see results and fail build on failure, command should be test
             command: test
             json: true
