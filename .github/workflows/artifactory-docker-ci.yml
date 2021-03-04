@@ -93,12 +93,11 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-      with:
-          image: ${{env.REPO_NAME}}/${{matrix.APP_NAME}}
-          args: --file=Dockerfile
-          # To see results and fail build on failure, command should be test
-          command: test
-          json: true
+            image: ${{env.REPO_NAME}}/${{matrix.APP_NAME}}
+            args: --file=Dockerfile
+            # To see results and fail build on failure, command should be test
+            command: test
+            json: true
 
       - name: Upload Snyk Results
         uses: actions/upload-artifact@v2
