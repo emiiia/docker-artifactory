@@ -1,0 +1,60 @@
+name: Build Dockerfile & Snyk
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Lint, Synk, build
+    runs-on: ubuntu-latest
+    env:
+      VERSION: latest
+      IMAGE: emiiia/node-web-app
+
+    steps:
+      ##########################
+      # Checkout the code base #
+      ##########################
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      ################################
+      # Run Linter against code base #
+      ################################
+      - name: Lint Code Base
+        uses: github/super-linter@v3
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_INCLUDE: ./Dockerfile
+
+      ################
+      # Docker build #
+      ################
+      - name: Build and tag the Docker image
+        run: |
+          docker build -t $IMAGE .
+          docker tag $IMAGE $IMAGE:$VERSION
+
+
+      - name: Logging Images
+        run: docker images
+
+      ################################
+      #  Check for Vulnerabilities   #
+      ################################
+      - name: Run Snyk to check Docker image for vulnerabilities
+        # Snyk can be used to break the build when it detects vulnerabilities.
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{env.IMAGE}}
+          args: --file=Dockerfile

@@ -1,0 +1,86 @@
+name: Artifactory Docker CD
+ 
+env:
+  REPO_NAME: elilillyco-github-actions-docker-lc.jfrog.io
+
+on:
+  release:
+    types: [created, prereleased]
+  push:
+    tags:
+      - '*-alpha*'
+      - '*-beta*'
+      - 'rc*'
+      - 'v*'
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Get Event Data
+        run: |
+          echo "Event type: ${{ github.event_name }}"
+          echo "Triggered by branch/tag: ${{ github.ref }}"
+          echo "Commit Sha: ${{ github.sha }}"
+          echo "Event Actor: ${{ github.actor }}"
+      - name: Abort Previous Builds
+        uses: potiuk/cancel-workflow-runs@v4_8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cancelMode: duplicates
+
+  deployToArtifactory:
+    name: Deploy to Artifactory
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        directory:
+          - './folder1'
+          - './folder2'
+        include:
+        - directory: './folder1'
+          APP_NAME: 'apptestone'
+          VERSION: latest
+          
+        - directory: './folder2'
+          APP_NAME: 'apptesttwo'
+          VERSION: version1.0
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Artifactory Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REPO_NAME }}
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_TOKEN }}
+
+      - name: Build and tag the Docker image
+        run: docker build -t ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}} .
+
+      - name: Push to artifactory
+        run: docker push ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Pull image 
+        run: |
+          docker pull ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
