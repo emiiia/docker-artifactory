@@ -80,7 +80,3 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Pull image 
-        run: |
-          docker pull ${{env.REPO_NAME}}/${{matrix.APP_NAME}}:${{matrix.VERSION}}
